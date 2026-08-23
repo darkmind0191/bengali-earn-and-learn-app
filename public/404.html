@@ -4,21 +4,22 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Earn & Learn বাংলা</title>
+
     <script>
       const base = '/bengali-earn-and-learn-app/';
       const path = window.location.pathname;
+      const search = window.location.search;
+      const hash = window.location.hash;
 
       if (path.startsWith(base)) {
         const route = path.slice(base.length);
-        const query = window.location.search;
-        const hash = window.location.hash;
 
         sessionStorage.setItem(
           'spa-redirect',
           JSON.stringify({
             route: '/' + route,
-            query,
-            hash
+            query: search,
+            hash: hash
           })
         );
       }
@@ -26,6 +27,7 @@
       window.location.replace(base);
     </script>
   </head>
+
   <body>
     <div>Loading...</div>
   </body>
