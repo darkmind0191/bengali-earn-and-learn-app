@@ -1,0 +1,8 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Earn &amp; Learn বাংলা</string>
+    <string name="admob_app_id">ca-app-pub-7724637834567497~6403328602</string>
+    <string name="title_activity_main">Earn &amp; Learn বাংলা</string>
+    <string name="package_name">com.darkmind.earnlearnbangla</string>
+    <string name="custom_url_scheme">com.darkmind.earnlearnbangla</string>
+</resources>
