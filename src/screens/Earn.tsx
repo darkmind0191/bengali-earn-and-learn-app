@@ -17,7 +17,7 @@ import {
   RewardAdPluginEvents,
 } from '@capacitor-community/admob';
 
-const TEST_REWARDED_AD_ID = 'ca-app-pub-3940256099942544/5224354917';
+const REWARDED_AD_ID = 'ca-app-pub-7724637834567497/4602473415';
 const AD_REWARD_POINTS = 10;
 
 export default function Earn() {
@@ -217,8 +217,8 @@ export default function Earn() {
       );
 
       await AdMob.prepareRewardVideoAd({
-        adId: TEST_REWARDED_AD_ID,
-        isTesting: true,
+        adId: REWARDED_AD_ID,
+        isTesting: false,
       });
 
       await AdMob.showRewardVideoAd();

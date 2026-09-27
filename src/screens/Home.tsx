@@ -21,6 +21,7 @@ import {
   ArrowDownToLine,
   Sparkles,
   Trophy,
+  Gamepad2,
 } from 'lucide-react';
 
 export default function Home() {
@@ -31,6 +32,9 @@ export default function Home() {
   const [checkInBusy, setCheckInBusy] = useState(false);
   const [posts, setPosts] = useState<Post[]>([]);
   const [streak, setStreak] = useState(0);
+  const [videosEnabled, setVideosEnabled] = useState(true);
+  const [miniGamesEnabled, setMiniGamesEnabled] = useState(true);
+  const [featureSettingsLoading, setFeatureSettingsLoading] = useState(false);
 
 
   const loadPosts = useCallback(async () => {
@@ -42,10 +46,37 @@ export default function Home() {
     if (data) setPosts(data);
   }, []);
 
+  const loadFeatureSettings = useCallback(async () => {
+    setFeatureSettingsLoading(true);
 
-  useEffect(() => {
-    loadPosts();
-  }, [loadPosts]);
+    const { data, error } = await supabase
+      .from('app_settings')
+      .select('key, value')
+      .in('key', ['videos_enabled', 'mini_games_enabled']);
+
+    if (error) {
+      console.error('Error loading feature settings:', error);
+      setFeatureSettingsLoading(false);
+      return;
+    }
+
+    data?.forEach((setting) => {
+      if (setting.key === 'videos_enabled') {
+        setVideosEnabled(setting.value);
+      }
+
+      if (setting.key === 'mini_games_enabled') {
+        setMiniGamesEnabled(setting.value);
+      }
+    });
+
+    setFeatureSettingsLoading(false);
+  }, []);
+
+   useEffect(() => {
+     loadPosts();
+     loadFeatureSettings();
+   }, [loadPosts, loadFeatureSettings]);
 
 useEffect(() => {
   loadDailyBonus();
@@ -263,27 +294,62 @@ await supabase.rpc('increment_balance', {
             </span>
           </button>
         </div>
-        <button
-          onClick={() => navigate('/videos')}
-          className="w-full rounded-2xl bg-white dark:bg-slate-800 p-4 shadow-sm border border-slate-100 dark:border-slate-700 flex items-center justify-between active:scale-[0.99] transition"
-        >
-          <div className="flex items-center gap-3">
-            <div className="w-12 h-12 rounded-xl bg-red-100 dark:bg-red-900/20 flex items-center justify-center">
-              <PlayCircle className="text-red-600 dark:text-red-400" size={24} />
-            </div>
+                 {/* Video & Mini Games */}
+                 {!featureSettingsLoading && (videosEnabled || miniGamesEnabled) && (
+                   <div className="grid grid-cols-2 gap-3">
 
-            <div className="text-left">
-              <h3 className="font-semibold text-slate-900 dark:text-white">
-                ভিডিও শিখুন
-              </h3>
-              <p className="text-sm text-slate-500 dark:text-slate-400">
-                প্রতিদিন নতুন ভিডিও দেখুন
-              </p>
-            </div>
-          </div>
+                     {/* Video */}
+                     {videosEnabled && (
+                       <button
+                         onClick={() => navigate('/videos')}
+                         className={`rounded-2xl bg-white dark:bg-slate-800 p-3 shadow-sm border border-slate-100 dark:border-slate-700 text-left active:scale-[0.99] transition ${
+                           !miniGamesEnabled ? 'col-span-2' : ''
+                         }`}
+                       >
+                         <div className="w-9 h-9 rounded-lg bg-red-100 dark:bg-red-900/20 flex items-center justify-center">
+                           <PlayCircle
+                             className="text-red-600 dark:text-red-400"
+                             size={19}
+                           />
+                         </div>
 
-          <ChevronRight className="text-slate-400" size={20} />
-        </button>
+                         <h3 className="font-semibold text-slate-900 dark:text-white mt-2 text-sm">
+                           ভিডিও শিখুন
+                         </h3>
+
+                         <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
+                           নতুন ভিডিও দেখুন
+                         </p>
+                       </button>
+                     )}
+
+                     {/* Mini Games */}
+                     {miniGamesEnabled && (
+                       <button
+                         onClick={() => navigate('/mini-games')}
+                         className={`rounded-2xl bg-white dark:bg-slate-800 p-3 shadow-sm border border-slate-100 dark:border-slate-700 text-left active:scale-[0.99] transition ${
+                           !videosEnabled ? 'col-span-2' : ''
+                         }`}
+                       >
+                         <div className="w-9 h-9 rounded-lg bg-purple-100 dark:bg-purple-900/20 flex items-center justify-center">
+                           <Gamepad2
+                             className="text-purple-600 dark:text-purple-400"
+                             size={19}
+                           />
+                         </div>
+
+                         <h3 className="font-semibold text-slate-900 dark:text-white mt-2 text-sm">
+                           মিনি গেম
+                         </h3>
+
+                         <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
+                           খেলুন ও উপভোগ করুন
+                         </p>
+                       </button>
+                     )}
+
+                   </div>
+                 )}
         <button
           onClick={() => navigate('/leaderboard')}
           className="w-full rounded-2xl bg-white dark:bg-slate-800 p-4 shadow-sm border border-slate-100 dark:border-slate-700 flex items-center justify-between active:scale-[0.99] transition"

@@ -13,6 +13,15 @@ import BrandMark from './components/BrandMark';
 import Videos from './screens/Videos';
 import Leaderboard from './screens/Leaderboard';
 import DailyChallenge from './screens/DailyChallenge';
+import MiniGames from './screens/MiniGames';
+import SmartQuick from './games/smart-quick/SmartQuick';
+import NumberMatch from './games/number-match/NumberMatch';
+import TargetShooter from './games/target-shooter/TargetShooter';
+import TrafficEscape from './games/traffic-escape/TrafficEscape';
+import FishCatch from './games/fish-catch/FishCatch';
+import SpaceFighter from './games/space-fighter/SpaceFighter';
+import BlockBlast from './games/block-blast/BlockBlast';
+import FruitSlice from './games/fruit-slice/FruitSlice';
 
 function ProtectedLayout() {
   const location = useLocation();
@@ -20,7 +29,7 @@ function ProtectedLayout() {
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-900 flex flex-col">
-      <div className="flex-1 pb-20 max-w-md mx-auto w-full">
+      <div className="flex-1 pb-20 max-w-x1 mx-auto w-full">
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/quiz" element={<Quiz />} />
@@ -30,6 +39,33 @@ function ProtectedLayout() {
           <Route path="/profile" element={<Profile />} />
           <Route path="/admin" element={<Admin />} />
           <Route path="/videos" element={<Videos />} />
+          <Route path="/mini-games" element={<MiniGames />} />
+          <Route path="/mini-games/smart-quick" element={<SmartQuick />} />
+          <Route path="/mini-games/number-match" element={<NumberMatch />} />
+          <Route
+            path="/mini-games/target-shooter"
+            element={<TargetShooter />}
+          />
+          <Route
+            path="/mini-games/traffic-escape"
+            element={<TrafficEscape />}
+          />
+          <Route
+            path="/mini-games/fish-catch"
+            element={<FishCatch />}
+          />
+          <Route
+            path="/mini-games/space-fighter"
+            element={<SpaceFighter />}
+          />
+          <Route
+            path="/mini-games/block-blast"
+            element={<BlockBlast />}
+          />
+          <Route
+            path="/mini-games/fruit-slice"
+            element={<FruitSlice />}
+          />
           <Route path="/leaderboard" element={<Leaderboard />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>

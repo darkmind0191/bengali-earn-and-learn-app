@@ -88,6 +88,10 @@ export default function Admin() {
   const navigate = useNavigate();
 
   const [section, setSection] = useState<Section>('dashboard');
+  const [videosEnabled, setVideosEnabled] = useState(true);
+  const [miniGamesEnabled, setMiniGamesEnabled] = useState(true);
+  const [settingsLoading, setSettingsLoading] = useState(false);
+  const [settingsSaving, setSettingsSaving] = useState(false);
 
   const [loading, setLoading] = useState(false);
   const [msg, setMsg] = useState('');
@@ -280,6 +284,76 @@ export default function Admin() {
     setTotalUsers(list.length);
   }
 
+/* =========================
+   Load App Settings
+========================= */
+
+async function loadSettings() {
+  setSettingsLoading(true);
+
+  const { data, error } = await supabase
+    .from('app_settings')
+    .select('key, value')
+    .in('key', ['videos_enabled', 'mini_games_enabled']);
+
+  if (error) {
+    console.error('Error loading settings:', error);
+    setSettingsLoading(false);
+    return;
+  }
+
+  data?.forEach((setting) => {
+    if (setting.key === 'videos_enabled') {
+      setVideosEnabled(setting.value);
+    }
+
+    if (setting.key === 'mini_games_enabled') {
+      setMiniGamesEnabled(setting.value);
+    }
+  });
+
+  setSettingsLoading(false);
+}
+
+/* =========================
+   Save App Settings
+========================= */
+
+async function saveSettings() {
+  setSettingsSaving(true);
+  setMsg('');
+
+  const { error: videoError } = await supabase
+    .from('app_settings')
+    .update({
+      value: videosEnabled,
+      updated_at: new Date().toISOString(),
+    })
+    .eq('key', 'videos_enabled');
+
+  if (videoError) {
+    setMsg('Video setting save error: ' + videoError.message);
+    setSettingsSaving(false);
+    return;
+  }
+
+  const { error: miniGameError } = await supabase
+    .from('app_settings')
+    .update({
+      value: miniGamesEnabled,
+      updated_at: new Date().toISOString(),
+    })
+    .eq('key', 'mini_games_enabled');
+
+  if (miniGameError) {
+    setMsg('Mini Game setting save error: ' + miniGameError.message);
+    setSettingsSaving(false);
+    return;
+  }
+
+  setMsg('Settings successfully saved.');
+  setSettingsSaving(false);
+}
   /* =========================
      Load Everything
   ========================= */
@@ -294,6 +368,7 @@ export default function Admin() {
       loadWithdrawals(),
       loadPosts(),
       loadUsers(),
+      loadSettings(),
     ]);
 
     setLoading(false);
@@ -2540,42 +2615,147 @@ async function saveDailyChallenge() {
 
         {section === 'settings' && (
           <div className="space-y-5">
-
             <SectionHeader
               title="Settings"
-              subtitle="Admin application settings"
+              subtitle="Control app features"
               color="text-slate-600"
             />
 
-            <div className="bg-white dark:bg-slate-900 rounded-2xl p-5 shadow-sm">
+            <div className="bg-white dark:bg-slate-900 rounded-2xl p-5 shadow-sm border border-slate-100 dark:border-slate-800">
+              <div className="flex items-center gap-3 mb-5">
+                <div className="w-12 h-12 rounded-2xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center">
+                  <Settings
+                    size={25}
+                    className="text-slate-600 dark:text-slate-300"
+                  />
+                </div>
 
-              <div className="w-14 h-14 rounded-2xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center mb-4">
-                <Settings size={27} />
+                <div>
+                  <h3 className="text-lg font-bold text-slate-900 dark:text-white">
+                    App Features
+                  </h3>
+                  <p className="text-sm text-slate-500 dark:text-slate-400">
+                    কোন feature Home screen-এ দেখাবে তা নিয়ন্ত্রণ করুন
+                  </p>
+                </div>
               </div>
 
-              <h3 className="text-lg font-bold text-slate-900 dark:text-white">
-                App Settings
-              </h3>
+              {settingsLoading ? (
+                <div className="py-8 text-center">
+                  <RefreshCw
+                    size={24}
+                    className="mx-auto animate-spin text-brand-600"
+                  />
+                  <p className="text-sm text-slate-500 dark:text-slate-400 mt-3">
+                    Settings loading...
+                  </p>
+                </div>
+              ) : (
+                <div className="space-y-3">
 
-              <p className="text-sm text-slate-500 dark:text-slate-400 mt-2 leading-relaxed">
-                Reward points, referral settings,
-                Daily Quiz settings এবং অন্যান্য
-                global settings-এর জন্য database-backed
-                settings table এখনো তোমার দেওয়া
-                schema-তে নেই।
-              </p>
+                  {/* Video Feature */}
+                  <div className="flex items-center justify-between gap-4 p-4 rounded-2xl bg-slate-50 dark:bg-slate-800">
+                    <div className="flex items-center gap-3 min-w-0">
+                      <div className="w-11 h-11 shrink-0 rounded-xl bg-red-100 dark:bg-red-900/20 flex items-center justify-center">
+                        <Video
+                          size={22}
+                          className="text-red-600 dark:text-red-400"
+                        />
+                      </div>
 
-              <div className="mt-5 rounded-xl bg-slate-50 dark:bg-slate-800 p-4">
-                <p className="text-sm text-slate-600 dark:text-slate-300">
-                  এই sectionটি আপাতত placeholder
-                  রাখা হয়েছে, যাতে অজানা database
-                  table ধরে কোনো code তৈরি করে
-                  বর্তমানে কাজ করা system নষ্ট না হয়।
-                </p>
-              </div>
+                      <div className="min-w-0">
+                        <h4 className="font-semibold text-slate-900 dark:text-white">
+                          ভিডিও শিখুন
+                        </h4>
+                        <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+                          Home screen-এ ভিডিও শেখার option দেখাবে
+                        </p>
+                      </div>
+                    </div>
 
+                    <button
+                      type="button"
+                      onClick={() => setVideosEnabled((prev) => !prev)}
+                      className={`relative shrink-0 w-12 h-7 rounded-full transition ${
+                        videosEnabled
+                          ? 'bg-green-500'
+                          : 'bg-slate-300 dark:bg-slate-600'
+                      }`}
+                      aria-label="Toggle videos"
+                    >
+                      <span
+                        className={`absolute top-1 w-5 h-5 rounded-full bg-white shadow-sm transition ${
+                          videosEnabled ? 'left-6' : 'left-1'
+                        }`}
+                      />
+                    </button>
+                  </div>
+
+                  {/* Mini Games Feature */}
+                  <div className="flex items-center justify-between gap-4 p-4 rounded-2xl bg-slate-50 dark:bg-slate-800">
+                    <div className="flex items-center gap-3 min-w-0">
+                      <div className="w-11 h-11 shrink-0 rounded-xl bg-purple-100 dark:bg-purple-900/20 flex items-center justify-center text-xl">
+                        🎮
+                      </div>
+
+                      <div className="min-w-0">
+                        <h4 className="font-semibold text-slate-900 dark:text-white">
+                          মিনি গেম
+                        </h4>
+                        <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+                          Home screen-এ Mini Game option দেখাবে
+                        </p>
+                      </div>
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={() => setMiniGamesEnabled((prev) => !prev)}
+                      className={`relative shrink-0 w-12 h-7 rounded-full transition ${
+                        miniGamesEnabled
+                          ? 'bg-green-500'
+                          : 'bg-slate-300 dark:bg-slate-600'
+                      }`}
+                      aria-label="Toggle mini games"
+                    >
+                      <span
+                        className={`absolute top-1 w-5 h-5 rounded-full bg-white shadow-sm transition ${
+                          miniGamesEnabled ? 'left-6' : 'left-1'
+                        }`}
+                      />
+                    </button>
+                  </div>
+
+                  {/* Save Button */}
+                  <button
+                    type="button"
+                    onClick={saveSettings}
+                    disabled={settingsSaving}
+                    className="w-full mt-4 flex items-center justify-center gap-2 bg-brand-600 hover:bg-brand-700 disabled:opacity-60 text-white font-semibold py-3.5 rounded-xl transition active:scale-[0.99]"
+                  >
+                    {settingsSaving ? (
+                      <>
+                        <RefreshCw size={18} className="animate-spin" />
+                        Saving...
+                      </>
+                    ) : (
+                      <>
+                        <Save size={18} />
+                        Save Settings
+                      </>
+                    )}
+                  </button>
+
+                  {msg && (
+                    <div className="mt-3 rounded-xl bg-slate-50 dark:bg-slate-800 p-3">
+                      <p className="text-sm text-slate-600 dark:text-slate-300 text-center">
+                        {msg}
+                      </p>
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
-
           </div>
         )}
 
